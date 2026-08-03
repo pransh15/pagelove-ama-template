@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ask Me Anything — Pranshu Khanna</title>
+<style>
+  :root {
+    --ink: #1b1b18;
+    --paper: #faf8f4;
+    --line: #e4ded2;
+    --accent: #c4501f;
+    --muted: #77726a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  main { max-width: 640px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; color: var(--accent); font-weight: 600; margin: 0 0 .5rem; }
+  h1 { font-size: 2rem; margin: 0 0 .75rem; }
+  .bio { color: var(--muted); max-width: 46ch; }
+  .btn-github {
+    display: inline-block; margin-top: 1.25rem; padding: .6rem 1rem;
+    border: 1px solid var(--ink); border-radius: 6px; color: var(--ink);
+    text-decoration: none; font-size: .9rem; font-weight: 600;
+  }
+  .btn-github:hover { background: var(--ink); color: var(--paper); }
+  .deploy-note { color: var(--muted); font-size: .8rem; margin-top: .5rem; }
+  form { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  form h2 { font-size: 1.1rem; margin: 0 0 1rem; }
+  form input, form textarea {
+    width: 100%; padding: .6rem .7rem; margin-bottom: .75rem;
+    border: 1px solid var(--line); border-radius: 6px; font: inherit; background: #fff;
+  }
+  form textarea { min-height: 5rem; resize: vertical; }
+  form button {
+    padding: .6rem 1.1rem; border: none; border-radius: 6px;
+    background: var(--accent); color: #fff; font-weight: 600; font: inherit; cursor: pointer;
+  }
+  #form-status { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
+  #questions { list-style: none; margin: 2rem 0 0; padding: 0; }
+  .question { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+  .question-text { margin: 0 0 .25rem; font-weight: 600; }
+  .question-by { margin: 0; font-size: .8rem; color: var(--muted); }
+  .answer { margin: .6rem 0 0; padding: .75rem .9rem; background: #fff; border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; }
+  .pending-tag { display: inline-block; margin-top: .4rem; font-size: .7rem; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PERSONALIZE THIS — edit the text below, nothing else needed.
+     Everything from here to </header> is the only block you touch
+     to make this your own AMA page.
+     ============================================================ -->
+<main>
+  <header>
+    <p class="eyebrow">Ask Me Anything</p>
+    <h1>Pranshu Khanna</h1>
+    <p class="bio">
+      Developer Community Lead candidate at Pagelove. Ask me anything about
+      building dev communities, technical content, or this page itself —
+      it's a live Pagelove app, no backend, one HTML file.
+    </p>
+    <a class="btn-github" href="https://github.com/pransh15/pagelove-ama-template" target="_blank" rel="noopener noreferrer">
+      Get this template on GitHub &rarr;
+    </a>
+    <p class="deploy-note">
+      One-click "Deploy with Pagelove" is a v2 idea — for now, fork the repo,
+      edit the config block, and WebDAV-deploy it yourself.
+    </p>
+  </header>
+  <!-- ========================== end config ========================== -->
+
+  <form id="ask-form">
+    <h2>Ask a question</h2>
+    <input type="text" name="name" placeholder="Your name (optional)">
+    <textarea name="question" placeholder="What do you want to ask?" required></textarea>
+    <button type="submit">Submit question</button>
+    <p id="form-status" aria-live="polite"></p>
+  </form>
+
+  <ul id="questions">
+    <li class="question answered">
+      <p class="question-text">What's the fastest way to get started with Pagelove?</p>
+      <p class="question-by">— Pranshu</p>
+      <p class="answer">
+        Grab an API key from the console, then WebDAV-PUT a single HTML file —
+        no build step, no database, no API layer. This page is the demo: the
+        question form below writes straight into this document over HTTP.
+      </p>
+    </li>
+  </ul>
+</main>
+
+<script>
+  const form = document.getElementById('ask-form');
+  const status = document.getElementById('form-status');
+  const list = document.getElementById('questions');
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = form.name.value.trim() || 'Anonymous';
+    const text = form.question.value.trim();
+    if (!text) return;
+
+    const li = `<li class="question"><p class="question-text">${escapeHtml(text)}</p><p class="question-by">— ${escapeHtml(name)}</p><span class="pending-tag">Unanswered</span></li>`;
+
+    status.textContent = 'Sending…';
+    try {
+      const res = await fetch(location.pathname, {
+        method: 'POST',
+        headers: { 'Range': 'selector=#questions', 'Content-Type': 'text/html' },
+        body: li
+      });
+      if (res.ok) {
+        list.insertAdjacentHTML('beforeend', li);
+        form.reset();
+        status.textContent = 'Thanks — your question is in.';
+      } else {
+        status.textContent = 'Something went wrong (' + res.status + ').';
+      }
+    } catch (err) {
+      status.textContent = 'Network error — try again.';
+    }
+  });
+</script>
+
+<!-- ====================== Pagelove platform config ======================
+     Deny-by-default: this page is publicly readable (host default), but the
+     only WRITE a visitor can make is a POST into #questions, and only in the
+     exact shape below — a pending-tag question with no "answer" field. That
+     shape enforcement happens server-side (ShapeConstraint), not in this JS.
+     ======================================================================= -->
+<div hidden itemscope itemtype="https://pagelove.org/AuthorizationRule">
+  <meta itemprop="actor" content="*">
+  <meta itemprop="resource" content="/index.html">
+  <meta itemprop="method" content="POST">
+  <meta itemprop="selector" content="#questions">
+  <meta itemprop="action" content="Allow">
+</div>
+
+<div hidden itemscope itemtype="https://pagelove.org/ShapeConstraint">
+  <meta itemprop="resource" content="/index.html">
+  <meta itemprop="selector" content="#questions">
+  <code itemprop="constraint">:has(p[class="question-text"])</code>
+  <code itemprop="permit">li[class="question"]</code>
+  <code itemprop="permit">p[class="question-text"]</code>
+  <code itemprop="permit">p[class="question-by"]</code>
+  <code itemprop="permit">span[class="pending-tag"]</code>
+</div>
+
+</body>
+</html>
