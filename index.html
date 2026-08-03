@@ -43,7 +43,8 @@
     background: var(--accent); color: #fff; font-weight: 600; font: inherit; cursor: pointer;
   }
   #form-status { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
-  #questions { list-style: none; margin: 2rem 0 0; padding: 0; }
+  .section-heading { font-size: 1.1rem; margin: 2.5rem 0 .5rem; }
+  .question-list { list-style: none; margin: 0; padding: 0; }
   .question { padding: 1rem 0; border-bottom: 1px solid var(--line); }
   .question-text { margin: 0 0 .25rem; font-weight: 600; }
   .question-by { margin: 0; font-size: .8rem; color: var(--muted); }
@@ -77,15 +78,8 @@
   </header>
   <!-- ========================== end config ========================== -->
 
-  <form id="ask-form">
-    <h2>Ask a question</h2>
-    <input type="text" name="name" placeholder="Your name (optional)">
-    <textarea name="question" placeholder="What do you want to ask?" required></textarea>
-    <button type="submit">Submit question</button>
-    <p id="form-status" aria-live="polite"></p>
-  </form>
-
-  <ul id="questions">
+  <h2 class="section-heading">Previously answered</h2>
+  <ul id="examples" class="question-list">
     <li class="question answered">
       <p class="question-text">What's the fastest way to get started with Pagelove?</p>
       <p class="question-by">— Pranshu</p>
@@ -96,6 +90,17 @@
       </p>
     </li>
   </ul>
+
+  <form id="ask-form">
+    <h2>Ask a question</h2>
+    <input type="text" name="name" placeholder="Your name (optional)">
+    <textarea name="question" placeholder="What do you want to ask?" required></textarea>
+    <button type="submit">Submit question</button>
+    <p id="form-status" aria-live="polite"></p>
+  </form>
+
+  <h2 class="section-heading">Recent questions</h2>
+  <ul id="questions" class="question-list"></ul>
 </main>
 
 <script>
@@ -151,7 +156,7 @@
 
 <div hidden itemscope itemtype="https://pagelove.org/ShapeConstraint">
   <meta itemprop="resource" content="/index.html">
-  <meta itemprop="selector" content="#questions">
+  <meta itemprop="selector" content="ul#questions[id][class]">
   <code itemprop="constraint">:has(p[class="question-text"])</code>
   <code itemprop="permit">li[class="question"]</code>
   <code itemprop="permit">p[class="question-text"]</code>
