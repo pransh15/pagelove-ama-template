@@ -15,6 +15,12 @@ Live example: https://ease-snail-7122.onpagelove.com/
   <p class="question-by">…</p></li>`.
 - You answer questions by editing the file directly and redeploying — there's
   no public write path to the "answered" section.
+- Every answered question gets Share on X / Instagram / LinkedIn buttons.
+  Clicking one renders a branded PNG on the fly with `<canvas>` (1:1 for X and
+  LinkedIn, 9:16 for Instagram Stories) with a "Powered by Pagelove" mark and a
+  link back to the page, then hands it to the OS share sheet
+  (`navigator.share`) or falls back to downloading the image plus opening the
+  platform's share dialog.
 
 ## Make it yours
 

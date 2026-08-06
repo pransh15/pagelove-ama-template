@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ask Me Anything — Pranshu Khanna</title>
+<meta name="description" content="Ask Pranshu Khanna anything — a live Pagelove AMA page, no backend, one HTML file.">
+<meta property="og:title" content="Ask Me Anything — Pranshu Khanna">
+<meta property="og:description" content="Ask Pranshu Khanna anything — a live Pagelove AMA page, no backend, one HTML file.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23c4501f'/%3E%3Ctext x='50' y='68' font-size='60' text-anchor='middle' fill='white' font-family='sans-serif'%3EP%3C/text%3E%3C/svg%3E">
 <style>
   :root {
     --ink: #1b1b18;
@@ -20,7 +26,14 @@
     color: var(--ink);
     line-height: 1.5;
   }
-  main { max-width: 640px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  main { max-width: 960px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .layout { display: grid; grid-template-columns: 1fr 320px; gap: 3rem; align-items: start; }
+  .sidebar { position: sticky; top: 2rem; }
+  .sidebar form { margin-top: 0; padding-top: 0; border-top: none; }
+  @media (max-width: 760px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; }
+  }
   .eyebrow { text-transform: uppercase; letter-spacing: .08em; font-size: .75rem; color: var(--accent); font-weight: 600; margin: 0 0 .5rem; }
   h1 { font-size: 2rem; margin: 0 0 .75rem; }
   .bio { color: var(--muted); max-width: 46ch; }
@@ -43,13 +56,36 @@
     background: var(--accent); color: #fff; font-weight: 600; font: inherit; cursor: pointer;
   }
   #form-status { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
-  .section-heading { font-size: 1.1rem; margin: 2.5rem 0 .5rem; }
+  details#admin { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); }
+  details#admin summary { cursor: pointer; font-size: .85rem; color: var(--muted); }
+  #admin-body { margin-top: 1rem; }
+  #admin-body input[type="password"] { width: 100%; padding: .5rem .6rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; margin-bottom: .5rem; }
+  #admin-body button { padding: .4rem .8rem; border: none; border-radius: 6px; background: var(--ink); color: var(--paper); font: inherit; font-size: .8rem; cursor: pointer; }
+  .pending-row { padding: .75rem 0; border-bottom: 1px solid var(--line); }
+  .pending-row textarea { width: 100%; min-height: 3.5rem; margin: .4rem 0; padding: .5rem; border: 1px solid var(--line); border-radius: 6px; font: inherit; }
+  #admin-status { font-size: .8rem; color: var(--muted); margin-top: .5rem; }
   .question-list { list-style: none; margin: 0; padding: 0; }
   .question { padding: 1rem 0; border-bottom: 1px solid var(--line); }
   .question-text { margin: 0 0 .25rem; font-weight: 600; }
   .question-by { margin: 0; font-size: .8rem; color: var(--muted); }
   .answer { margin: .6rem 0 0; padding: .75rem .9rem; background: #fff; border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; }
   .pending-tag { display: inline-block; margin-top: .4rem; font-size: .7rem; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .share-row { margin-top: .6rem; display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+  .share-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 2rem; height: 2rem; border-radius: 50%; padding: 0;
+    border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer;
+  }
+  .share-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .share-status { font-size: .75rem; color: var(--muted); }
+  .tab-input { position: absolute; opacity: 0; pointer-events: none; }
+  .tab-nav { display: flex; gap: 1.5rem; margin-top: 2.5rem; border-bottom: 1px solid var(--line); }
+  .tab-nav label { padding-bottom: .6rem; cursor: pointer; font-weight: 600; color: var(--muted); border-bottom: 2px solid transparent; }
+  .tab-panel { display: none; }
+  #tab-answered:checked ~ .tab-nav label[for="tab-answered"],
+  #tab-questions:checked ~ .tab-nav label[for="tab-questions"] { color: var(--ink); border-color: var(--accent); }
+  #tab-answered:checked ~ #panel-answered,
+  #tab-questions:checked ~ #panel-questions { display: block; }
 </style>
 </head>
 <body>
@@ -60,47 +96,79 @@
      to make this your own AMA page.
      ============================================================ -->
 <main>
-  <header>
-    <p class="eyebrow">Ask Me Anything</p>
-    <h1>Pranshu Khanna</h1>
-    <p class="bio">
-      Developer Community Lead candidate at Pagelove. Ask me anything about
-      building dev communities, technical content, or this page itself —
-      it's a live Pagelove app, no backend, one HTML file.
-    </p>
-    <a class="btn-github" href="https://github.com/pransh15/pagelove-ama-template" target="_blank" rel="noopener noreferrer">
-      Get this template on GitHub &rarr;
-    </a>
-    <p class="deploy-note">
-      One-click "Deploy with Pagelove" is a v2 idea — for now, fork the repo,
-      edit the config block, and WebDAV-deploy it yourself.
-    </p>
-  </header>
-  <!-- ========================== end config ========================== -->
+  <div class="layout">
+    <div class="content">
+      <!-- ============================================================
+           PERSONALIZE THIS — edit the text below, nothing else needed.
+           Everything from here to </header> is the only block you touch
+           to make this your own AMA page.
+           ============================================================ -->
+      <header>
+        <p class="eyebrow">Ask Me Anything</p>
+        <h1>Pranshu Khanna</h1>
+        <p class="bio">
+          Developer Community Lead candidate at Pagelove. Ask me anything about
+          building dev communities, technical content, or this page itself —
+          it's a live Pagelove app, no backend, one HTML file.
+        </p>
+        <a class="btn-github" href="https://github.com/pransh15/pagelove-ama-template" target="_blank" rel="noopener noreferrer">
+          Get this template on GitHub &rarr;
+        </a>
+        <p class="deploy-note">
+          One-click "Deploy with Pagelove" is a v2 idea — for now, fork the repo,
+          edit the config block, and WebDAV-deploy it yourself.
+        </p>
+      </header>
+      <!-- ========================== end config ========================== -->
 
-  <h2 class="section-heading">Previously answered</h2>
-  <ul id="examples" class="question-list">
-    <li class="question answered">
-      <p class="question-text">What's the fastest way to get started with Pagelove?</p>
-      <p class="question-by">— Pranshu</p>
-      <p class="answer">
-        Grab an API key from the console, then WebDAV-PUT a single HTML file —
-        no build step, no database, no API layer. This page is the demo: the
-        question form below writes straight into this document over HTTP.
-      </p>
-    </li>
-  </ul>
+      <input type="radio" name="tab" id="tab-answered" class="tab-input" checked>
+      <input type="radio" name="tab" id="tab-questions" class="tab-input">
+      <div class="tab-nav">
+        <label for="tab-answered">Answered</label>
+        <label for="tab-questions">Questions</label>
+      </div>
 
-  <form id="ask-form">
-    <h2>Ask a question</h2>
-    <input type="text" name="name" placeholder="Your name (optional)">
-    <textarea name="question" placeholder="What do you want to ask?" required></textarea>
-    <button type="submit">Submit question</button>
-    <p id="form-status" aria-live="polite"></p>
-  </form>
+      <section id="panel-answered" class="tab-panel">
+        <ul id="examples" class="question-list">
+          <li class="question answered">
+            <p class="question-text">What's the fastest way to get started with Pagelove?</p>
+            <p class="question-by">— Pranshu</p>
+            <p class="answer">
+              Grab an API key from the console, then WebDAV-PUT a single HTML file —
+              no build step, no database, no API layer. This page is the demo: the
+              question form on the right writes straight into this document over HTTP.
+            </p>
+          </li>
+        </ul>
+      </section>
 
-  <h2 class="section-heading">Recent questions</h2>
-  <ul id="questions" class="question-list"></ul>
+      <section id="panel-questions" class="tab-panel">
+        <ul id="questions" class="question-list">
+          <li class="question"><p class="question-text">What made you want this role?</p><p class="question-by">— Interviewer</p><span class="pending-tag">Unanswered</span></li>
+        </ul>
+      </section>
+
+      <details id="admin">
+        <summary>Answer questions (admin)</summary>
+        <div id="admin-body">
+          <input type="password" id="admin-key" placeholder="pk_... (kept only in this tab)">
+          <button type="button" id="admin-load">Load pending questions</button>
+          <div id="admin-pending"></div>
+          <p id="admin-status" aria-live="polite"></p>
+        </div>
+      </details>
+    </div>
+
+    <aside class="sidebar">
+      <form id="ask-form">
+        <h2>Ask a question</h2>
+        <input type="text" name="name" placeholder="Your name (optional)">
+        <textarea name="question" placeholder="What do you want to ask?" required></textarea>
+        <button type="submit">Submit question</button>
+        <p id="form-status" aria-live="polite"></p>
+      </form>
+    </aside>
+  </div>
 </main>
 
 <script>
@@ -138,6 +206,273 @@
       status.textContent = 'Network error — try again.';
     }
   });
+
+  // ---- Admin: answer questions live, straight from the browser ----
+  // WEBDAV_URL is host-specific — change this when you fork/redeploy elsewhere.
+  const WEBDAV_URL = 'https://dav-ease-snail-7122.onpagelove.com/';
+
+  const adminKeyInput = document.getElementById('admin-key');
+  const adminLoadBtn = document.getElementById('admin-load');
+  const adminPending = document.getElementById('admin-pending');
+  const adminStatus = document.getElementById('admin-status');
+
+  adminKeyInput.value = sessionStorage.getItem('pagelove_admin_key') || '';
+
+  let liveDoc = null;
+  let liveLis = [];
+
+  async function loadPending() {
+    const key = adminKeyInput.value.trim();
+    if (!key) { adminStatus.textContent = 'Enter your API key first.'; return; }
+    sessionStorage.setItem('pagelove_admin_key', key);
+
+    adminStatus.textContent = 'Loading…';
+    adminPending.innerHTML = '';
+    try {
+      const res = await fetch(WEBDAV_URL + 'index.html', {
+        headers: { 'Authorization': 'Bearer ' + key }
+      });
+      if (!res.ok) {
+        adminStatus.textContent = 'Could not load (' + res.status + '). Check your key.';
+        return;
+      }
+      const text = await res.text();
+      liveDoc = new DOMParser().parseFromString(text, 'text/html');
+      liveLis = Array.from(liveDoc.querySelectorAll('#questions > li'));
+
+      if (liveLis.length === 0) {
+        adminStatus.textContent = 'No pending questions.';
+        return;
+      }
+      adminStatus.textContent = liveLis.length + ' pending.';
+      liveLis.forEach((li, i) => {
+        const row = document.createElement('div');
+        row.className = 'pending-row';
+
+        const q = document.createElement('p');
+        q.className = 'question-text';
+        q.textContent = li.querySelector('.question-text')?.textContent || '(no text)';
+        row.appendChild(q);
+
+        const by = document.createElement('p');
+        by.className = 'question-by';
+        by.textContent = li.querySelector('.question-by')?.textContent || '';
+        row.appendChild(by);
+
+        const textarea = document.createElement('textarea');
+        textarea.placeholder = 'Type your answer…';
+        row.appendChild(textarea);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = 'Publish answer';
+        btn.addEventListener('click', () => publishAnswer(i, textarea.value.trim()));
+        row.appendChild(btn);
+
+        adminPending.appendChild(row);
+      });
+    } catch (err) {
+      adminStatus.textContent = 'Network error loading pending questions.';
+    }
+  }
+
+  async function publishAnswer(index, answerText) {
+    if (!answerText) { adminStatus.textContent = 'Write an answer first.'; return; }
+    const key = adminKeyInput.value.trim();
+    const li = liveLis[index];
+    const examples = liveDoc.getElementById('examples');
+
+    li.querySelector('.pending-tag')?.remove();
+    li.className = 'question answered';
+    const answerP = liveDoc.createElement('p');
+    answerP.className = 'answer';
+    answerP.textContent = answerText;
+    li.appendChild(answerP);
+    examples.appendChild(li); // moves the node out of #questions automatically
+
+    const html = '<!DOCTYPE html>\n' + liveDoc.documentElement.outerHTML;
+
+    adminStatus.textContent = 'Publishing…';
+    try {
+      const res = await fetch(WEBDAV_URL + 'index.html', {
+        method: 'PUT',
+        headers: { 'Authorization': 'Bearer ' + key, 'Content-Type': 'text/html' },
+        body: html
+      });
+      if (res.ok) {
+        adminStatus.textContent = 'Published. Reloading…';
+        setTimeout(() => location.reload(), 600);
+      } else {
+        adminStatus.textContent = 'Publish failed (' + res.status + ').';
+      }
+    } catch (err) {
+      adminStatus.textContent = 'Network error publishing answer.';
+    }
+  }
+
+  adminLoadBtn.addEventListener('click', loadPending);
+
+  // ---- Share: turn any answered Q&A into a branded image for X / Instagram / LinkedIn ----
+  const SHARE_ICONS = {
+    x: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18.9 2H22l-7.4 8.5L23 22h-6.9l-5.4-6.9L4.3 22H1l7.9-9L1 2h7l4.9 6.3L18.9 2Zm-1.2 18h1.9L7.4 4H5.4l12.3 16Z"/></svg>',
+    instagram: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>',
+    linkedin: '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5ZM3 9h4v12H3V9Zm7 0h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.55 4.78 5.87V21h-4v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.08 1.4-2.08 2.86V21h-4V9Z"/></svg>'
+  };
+  // 1:1 for X, 9:16 for Instagram Stories, 1:1 for LinkedIn.
+  const SHARE_DIMS = { x: [1080, 1080], instagram: [1080, 1920], linkedin: [1080, 1080] };
+
+  function wrapText(ctx, text, maxWidth) {
+    const words = text.split(/\s+/);
+    const lines = [];
+    let line = '';
+    for (const word of words) {
+      const test = line ? line + ' ' + word : word;
+      if (line && ctx.measureText(test).width > maxWidth) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function renderShareCard(w, h, question, by, answer) {
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    const pad = w * 0.08;
+    const font = (weight, size) => `${weight} ${Math.round(size)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+
+    ctx.fillStyle = '#faf8f4';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#c4501f';
+    ctx.fillRect(0, 0, w, h * 0.012);
+
+    ctx.textAlign = 'left';
+    let y = pad * 1.5;
+    ctx.fillStyle = '#c4501f';
+    ctx.font = font(700, w * 0.032);
+    ctx.fillText((document.querySelector('.eyebrow')?.textContent || 'Ask Me Anything').toUpperCase(), pad, y);
+
+    y += w * 0.09;
+    ctx.fillStyle = '#1b1b18';
+    ctx.font = font(700, w * 0.052);
+    wrapText(ctx, question, w - pad * 2).slice(0, 5).forEach(line => { ctx.fillText(line, pad, y); y += w * 0.065; });
+
+    y += w * 0.02;
+    ctx.fillStyle = '#77726a';
+    ctx.font = font(400, w * 0.028);
+    ctx.fillText('— ' + (by || 'Anonymous'), pad, y);
+
+    y += w * 0.06;
+    ctx.strokeStyle = '#e4ded2';
+    ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w - pad, y); ctx.stroke();
+    y += w * 0.07;
+
+    ctx.fillStyle = '#1b1b18';
+    ctx.font = font(400, w * 0.036);
+    const lineHeight = w * 0.05;
+    const footerTop = h - pad * 2.6;
+    for (const line of wrapText(ctx, answer, w - pad * 2)) {
+      if (y > footerTop) { ctx.fillText('…', pad, y); break; }
+      ctx.fillText(line, pad, y);
+      y += lineHeight;
+    }
+
+    // footer: ask-more link + "Powered by Pagelove" wordmark, centered
+    const footerY = h - pad * 1.2;
+    ctx.strokeStyle = '#e4ded2';
+    ctx.beginPath(); ctx.moveTo(pad, footerY - w * 0.06); ctx.lineTo(w - pad, footerY - w * 0.06); ctx.stroke();
+
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#77726a';
+    ctx.font = font(400, w * 0.022);
+    ctx.fillText('Ask your own question → ' + location.origin + location.pathname, w / 2, footerY - w * 0.015);
+
+    const markR = w * 0.018;
+    const wordmark = 'Powered by Pagelove';
+    ctx.font = font(700, w * 0.026);
+    const totalWidth = markR * 2 + w * 0.012 + ctx.measureText(wordmark).width;
+    const startX = w / 2 - totalWidth / 2;
+    const markCy = footerY + w * 0.025;
+
+    ctx.beginPath();
+    ctx.arc(startX + markR, markCy, markR, 0, Math.PI * 2);
+    ctx.fillStyle = '#c4501f';
+    ctx.fill();
+    ctx.fillStyle = '#faf8f4';
+    ctx.font = font(700, markR * 1.3);
+    ctx.textAlign = 'center';
+    ctx.fillText('P', startX + markR, markCy + markR * 0.45);
+
+    ctx.fillStyle = '#1b1b18';
+    ctx.font = font(700, w * 0.026);
+    ctx.textAlign = 'left';
+    ctx.fillText(wordmark, startX + markR * 2 + w * 0.012, markCy + markR * 0.45);
+
+    return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+  }
+
+  async function shareAnswer(platform, question, by, answer, statusEl) {
+    statusEl.textContent = 'Creating image…';
+    try {
+      const [w, h] = SHARE_DIMS[platform];
+      const blob = await renderShareCard(w, h, question, by, answer);
+      const pageUrl = location.origin + location.pathname;
+      const shareText = question + ' — via Ask Me Anything';
+      const file = new File([blob], `ama-${platform}.png`, { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: document.title, text: shareText + '\n' + pageUrl });
+        statusEl.textContent = 'Shared!';
+        return;
+      }
+
+      const dl = document.createElement('a');
+      dl.href = URL.createObjectURL(blob);
+      dl.download = `ama-${platform}.png`;
+      dl.click();
+      URL.revokeObjectURL(dl.href);
+
+      if (platform === 'x') {
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(pageUrl)}`, '_blank', 'noopener');
+        statusEl.textContent = 'Image downloaded — attach it to your post.';
+      } else if (platform === 'linkedin') {
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}`, '_blank', 'noopener');
+        statusEl.textContent = 'Image downloaded — attach it to your post.';
+      } else {
+        statusEl.textContent = 'Image downloaded — open Instagram and share it to your story.';
+      }
+    } catch (err) {
+      if (err.name !== 'AbortError') statusEl.textContent = 'Could not create image.';
+    }
+  }
+
+  function initShareButtons() {
+    document.querySelectorAll('.question.answered').forEach(li => {
+      if (li.querySelector('.share-row')) return;
+      const question = li.querySelector('.question-text')?.textContent || '';
+      const by = (li.querySelector('.question-by')?.textContent || '').replace(/^—\s*/, '');
+      const answer = li.querySelector('.answer')?.textContent.trim() || '';
+      if (!answer) return;
+
+      const row = document.createElement('div');
+      row.className = 'share-row';
+      row.innerHTML = ['x', 'instagram', 'linkedin'].map(p =>
+        `<button type="button" class="share-btn" data-platform="${p}" aria-label="Share on ${p}">${SHARE_ICONS[p]}</button>`
+      ).join('') + '<span class="share-status" aria-live="polite"></span>';
+
+      const statusEl = row.querySelector('.share-status');
+      row.querySelectorAll('.share-btn').forEach(btn => {
+        btn.addEventListener('click', () => shareAnswer(btn.dataset.platform, question, by, answer, statusEl));
+      });
+      li.appendChild(row);
+    });
+  }
+
+  initShareButtons();
 </script>
 
 <!-- ====================== Pagelove platform config ======================
